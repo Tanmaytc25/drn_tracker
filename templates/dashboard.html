@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+<h1>DRN Dashboard</h1>
+
+{% if data %}
+  <table border="1">
+    <tr>
+      <th>Patient</th>
+      <th>Risk Score</th>
+      <th>Date</th>
+    </tr>
+    {% for row in data %}
+      <tr {% if row[2] >= 70 %} style="background-color: #ffcccc;" {% endif %}>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  {% if chart_path %}
+    <h3>Risk Score Trend</h3>
+    <img src="{{ chart_path }}" alt="Risk Chart">
+  {% endif %}
+{% else %}
+  <p>No data yet.</p>
+{% endif %}
+
+<a href="/">Back to Patients</a>
+</body>
+</html>
+

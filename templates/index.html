@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DRN Tracker - Patients</title>
+</head>
+<body>
+<h1>DRN Tracker</h1>
+<h2>Add Patient</h2>
+<form method="POST" action="/add_patient">
+  <input type="text" name="name" placeholder="Patient Name" required>
+  <button type="submit">Add</button>
+</form>
+
+<h2>Patients</h2>
+<ul>
+  {% for patient in patients %}
+    <li>{{ patient[1] }} - <a href="/log_symptom/{{ patient[0] }}">Log Symptom</a></li>
+  {% endfor %}
+</ul>
+
+<a href="/dashboard">Go to Dashboard</a>
+</body>
+</html>
+

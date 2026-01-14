@@ -1,19 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Log Symptom</title>
+  <title>Log Symptoms</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+    h1 { color: #2c3e50; }
+    form { max-width: 400px; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 10px; margin-bottom: 5px; font-weight: bold; }
+    input[type=number], input[type=date] { width: 100%; padding: 8px; margin-bottom: 10px; }
+    input[type=submit] { padding: 10px 15px; background-color: #2980b9; color: white; border: none; cursor: pointer; margin-top: 10px; }
+    input[type=submit]:hover { background-color: #3498db; }
+    a { display: inline-block; margin-top: 15px; text-decoration: none; color: #2980b9; font-weight: bold; }
+  </style>
 </head>
 <body>
-<h1>Log Symptom for Patient {{ patient_id }}</h1>
-<form method="POST">
-  Blurred Vision (0-5): <input type="number" name="blurred_vision" min="0" max="5" required><br>
-  Eye Discomfort (0-5): <input type="number" name="eye_discomfort" min="0" max="5" required><br>
-  Light Sensitivity (0-5): <input type="number" name="light_sensitivity" min="0" max="5" required><br>
-  Fatigue (0-5): <input type="number" name="fatigue" min="0" max="5" required><br>
-  Date (YYYY-MM-DD): <input type="text" name="date" required><br>
-  <button type="submit">Submit</button>
-</form>
-<a href="/">Back</a>
+  <h1>Log Symptoms for Patient {{ patient_id }}</h1>
+
+  <form method="post">
+    <label for="blurred_vision">Blurred Vision (0-5)</label>
+    <input type="number" id="blurred_vision" name="blurred_vision" min="0" max="5" required>
+
+    <label for="eye_discomfort">Eye Discomfort (0-5)</label>
+    <input type="number" id="eye_discomfort" name="eye_discomfort" min="0" max="5" required>
+
+    <label for="light_sensitivity">Light Sensitivity (0-5)</label>
+    <input type="number" id="light_sensitivity" name="light_sensitivity" min="0" max="5" required>
+
+    <label for="fatigue">Fatigue (0-5)</label>
+    <input type="number" id="fatigue" name="fatigue" min="0" max="5" required>
+
+    <label for="date">Date</label>
+    <input type="date" id="date" name="date" value="{{ date }}" required>
+
+    <input type="submit" value="Submit">
+  </form>
+
+  <a href="/">Back to Patient List</a>
 </body>
 </html>
+
 

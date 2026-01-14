@@ -1,30 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>DRN Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #2c3e50; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #2c3e50; color: white; }
+    tr:nth-child(even){background-color: #f2f2f2;}
+    tr.high-risk { background-color: #ffcccc !important; }
+    img { max-width: 100%; height: auto; }
+    a { text-decoration: none; color: #2980b9; font-weight: bold; }
+  </style>
 </head>
 <body>
 <h1>DRN Dashboard</h1>
 
 {% if data %}
-  <table border="1">
+  <table>
     <tr>
       <th>Patient</th>
       <th>Risk Score</th>
       <th>Date</th>
     </tr>
     {% for row in data %}
-      <tr {% if row[2] >= 70 %} style="background-color: #ffcccc;" {% endif %}>
-        <td>{{ row[1] }}</td>
-        <td>{{ row[2] }}</td>
-        <td>{{ row[3] }}</td>
+      <tr class="{% if row.risk_score >= 70 %}high-risk{% endif %}">
+        <td>{{ row.patient_name if row.patient_name else row.name }}</td>
+        <td>{{ row.risk_score }}</td>
+        <td>{{ row.date }}</td>
       </tr>
     {% endfor %}
   </table>
+
   {% if chart_path %}
     <h3>Risk Score Trend</h3>
     <img src="{{ chart_path }}" alt="Risk Chart">
   {% endif %}
+
 {% else %}
   <p>No data yet.</p>
 {% endif %}
@@ -32,4 +45,7 @@
 <a href="/">Back to Patients</a>
 </body>
 </html>
+
+
+
 

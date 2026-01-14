@@ -1,21 +1,33 @@
+# Built-ins imports to fix Pylance warnings # CI/CD test comment
+from builtins import round, int, list, reversed
+
+import os
+import sqlite3
 import matplotlib
 matplotlib.use('Agg')
-from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
-import os
 import matplotlib.pyplot as plt
+from flask import Flask, render_template, request, redirect, url_for
+from analysis.process_simulation import process_simulation
+from datetime import datetime
 
+# ----------------------------
+# Initialize Flask
+# ----------------------------
 app = Flask(__name__)
 
-# Initialize database
+# ----------------------------
+# Database config
+# ----------------------------
 DB_FILE = "patients.db"
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
+    # Patients table
     c.execute('''CREATE TABLE IF NOT EXISTS patients
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   name TEXT)''')
+    # Symptoms table
     c.execute('''CREATE TABLE IF NOT EXISTS symptoms
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   patient_id INTEGER,
@@ -30,7 +42,9 @@ def init_db():
 
 init_db()
 
+# ----------------------------
 # Risk calculation
+# ----------------------------
 def calculate_risk(blurred_vision, eye_discomfort, light_sensitivity, fatigue):
     score = (blurred_vision / 5 * 0.4 +
              eye_discomfort / 5 * 0.3 +
@@ -38,7 +52,10 @@ def calculate_risk(blurred_vision, eye_discomfort, light_sensitivity, fatigue):
              fatigue / 5 * 0.1) * 100
     return round(score, 2)
 
+# ----------------------------
 # Routes
+# ----------------------------
+
 @app.route("/")
 def index():
     conn = sqlite3.connect(DB_FILE)
@@ -66,7 +83,7 @@ def log_symptom(patient_id):
         light_sensitivity = int(request.form["light_sensitivity"])
         fatigue = int(request.form["fatigue"])
         risk_score = calculate_risk(blurred_vision, eye_discomfort, light_sensitivity, fatigue)
-        date = request.form["date"]
+        date = request.form.get("date") or datetime.today().strftime("%Y-%m-%d")
 
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
@@ -90,24 +107,61 @@ def dashboard():
     data = c.fetchall()
     conn.close()
 
-    # Generate chart
-    if data:
-        dates = [row[3] for row in data]
-        scores = [row[2] for row in data]
-        plt.figure(figsize=(5,3))
-        plt.plot(dates, scores, marker='o')
+    # Convert to dicts for template
+    results = [{"id": row[0], "name": row[1], "risk_score": row[2], "date": row[3]} for row in data]
+
+    # Generate overall chart
+    chart_path = None
+    if results:
+        chart_path = "static/risk_chart.png"
+        dates = [r['date'] for r in results]
+        scores = [r['risk_score'] for r in results]
+        plt.figure(figsize=(6,4))
+        plt.plot(dates, scores, marker='o', color='blue')
         plt.title("Risk Scores Over Time")
         plt.xlabel("Date")
         plt.ylabel("Risk Score")
+        plt.xticks(rotation=45)
+        plt.grid(True, linestyle='--', alpha=0.5)
         plt.tight_layout()
-        chart_path = "static/risk_chart.png"
+        os.makedirs("static", exist_ok=True)
         plt.savefig(chart_path)
         plt.close()
-    else:
-        chart_path = None
 
-    return render_template("dashboard.html", data=data, chart_path=chart_path)
+    return render_template("dashboard.html", data=results, chart_path=chart_path)
 
+@app.route('/run_simulation/<patient_name>')
+def run_simulation(patient_name):
+    csv_file = 'data_samples/sample_patient.csv'  # simulated input
+    results = process_simulation(patient_name, csv_file)
+
+    # Ensure results folder exists
+    results_dir = os.path.join("static", "results")
+    os.makedirs(results_dir, exist_ok=True)
+
+    # Generate patient-specific chart
+    chart_path = os.path.join(results_dir, f"{patient_name}_risk_chart.png")
+    dates = [r['date'] for r in results]
+    scores = [r['risk_score'] for r in results]
+    plt.figure(figsize=(6,4))
+    plt.plot(dates, scores, marker='o', color='green')
+    plt.title(f"Risk Scores Over Time - {patient_name}")
+    plt.xlabel("Date")
+    plt.ylabel("Risk Score")
+    plt.xticks(rotation=45)
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(chart_path)
+    plt.close()
+
+    return render_template("dashboard.html", data=results, chart_path=chart_path)
+
+# ----------------------------
+# Run Flask
+# ----------------------------
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
 
